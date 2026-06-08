@@ -25,6 +25,10 @@
   <a href="https://github.com/dogxii/webark-im-template/issues">反馈建议</a>
 </p>
 
+## ⚠️ 声明
+
+本项目为独立开源 IM 前端模板，不隶属于任何第三方即时通讯平台。本项目仅供学习交流，请勿用于违法用途。
+
 ## 🖼️ 预览
 
 ![桌面端聊天预览](./docs/screenshots/desktop-chat.jpg)
