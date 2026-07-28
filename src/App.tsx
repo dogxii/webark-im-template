@@ -6,8 +6,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-	AboutModal,
-	AddContactModal,
 	ChatMainContent,
 	ChatShell,
 	ChatSidebarContent,
@@ -15,34 +13,38 @@ import {
 	type ConversationDrafts,
 	type ConversationPreference,
 	type ConversationPreferences,
-	CreateGroupModal,
 	createMemoryChatDataSource,
 	createTemplateDemoData,
 	defaultConversationPreference,
 	defaultToolRegistry,
 	displayUserName,
 	type GroupUpdateInput,
-	HelpModal,
 	loadConversationDrafts,
 	loadConversationPreferences,
 	type Message,
 	type MessageAction,
-	MobileProfileEditorPage,
-	MobileProfileSheet,
 	mergeConversationPreferences,
-	ProfileEditorModal,
-	SettingsModal,
 	type SettingsTab,
 	saveConversationPreferences,
 	type ToolPaneItem,
-	updateConversationLastMessage,
-	upsertMessage,
 	useChatDataController,
 	type User,
 	useChatShellController,
 	useThemePreference,
 	withConversationDraft,
 } from "./template";
+import { AddContactModal, CreateGroupModal } from "./template/contactModals";
+import { AboutModal, HelpModal } from "./template/infoModals";
+import {
+	updateConversationLastMessage,
+	upsertMessage,
+} from "./template/messageState";
+import { MobileProfileSheet } from "./template/mobileProfileSheet";
+import {
+	MobileProfileEditorPage,
+	ProfileEditorModal,
+} from "./template/profileEditorModal";
+import { SettingsModal } from "./template/settingsModal";
 
 type DemoModal =
 	| "profile"

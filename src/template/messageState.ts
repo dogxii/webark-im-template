@@ -63,16 +63,11 @@ export function mergeServerReceipt(
 }
 
 export function upsertMessage(messages: Message[], next: Message): Message[] {
-	const existingIndex = messages.findIndex((message) =>
-		isSameMessageDelivery(message, next),
-	);
+	const existingIndex = findIndexedMessageIndex(indexMessages(messages), next);
 
 	if (existingIndex >= 0) {
 		const existing = messages[existingIndex];
-		const merged =
-			next.deliveryStatus === "sent"
-				? mergeServerReceipt(existing, next)
-				: { ...existing, ...next };
+		const merged = mergeMessageDelivery(existing, next);
 		const updated = [...messages];
 		updated[existingIndex] = merged;
 		return sortMessagesByTime(updated);
@@ -89,11 +84,17 @@ export function prependMessagePage(
 		return current;
 	}
 
-	return sortMessagesByTime([...historyMessages, ...current]).filter(
-		(message, index, messages) =>
-			messages.findIndex((item) => isSameMessageDelivery(item, message)) ===
-			index,
-	);
+	return mergeMessagePage(current, historyMessages);
+}
+
+export function mergeMessagePage(current: Message[], pageMessages: Message[]) {
+	return mergeMessageLists([...pageMessages, ...current]);
+}
+
+export function getMessageRenderKey(message: Message) {
+	return `${message.conversationId}:${
+		message.clientMessageId ?? message.serverMessageId ?? message.id
+	}`;
 }
 
 export function updateConversationLastMessage(
@@ -136,6 +137,76 @@ export function isSameMessageDelivery(first: Message, second: Message) {
 			first.serverMessageId === second.serverMessageId) ||
 		first.id === second.id,
 	);
+}
+
+function mergeMessageLists(messages: Message[]) {
+	const merged: Message[] = [];
+	const index = new Map<string, number>();
+
+	for (const message of messages) {
+		const existingIndex = findIndexedMessageIndex(index, message);
+
+		if (existingIndex >= 0) {
+			const next = mergeMessageDelivery(merged[existingIndex], message);
+			merged[existingIndex] = next;
+			indexMessage(index, next, existingIndex);
+			continue;
+		}
+
+		merged.push(message);
+		indexMessage(index, message, merged.length - 1);
+	}
+
+	return sortMessagesByTime(merged);
+}
+
+function mergeMessageDelivery(existing: Message, next: Message) {
+	if (next.deliveryStatus === "sent") {
+		return mergeServerReceipt(existing, next);
+	}
+	if (existing.deliveryStatus === "sent") {
+		return mergeServerReceipt(next, existing);
+	}
+	return { ...existing, ...next };
+}
+
+function indexMessages(messages: Message[]) {
+	const index = new Map<string, number>();
+	messages.forEach((message, messageIndex) => {
+		indexMessage(index, message, messageIndex);
+	});
+	return index;
+}
+
+function indexMessage(
+	index: Map<string, number>,
+	message: Message,
+	messageIndex: number,
+) {
+	for (const key of messageIdentityKeys(message)) {
+		index.set(key, messageIndex);
+	}
+}
+
+function findIndexedMessageIndex(index: Map<string, number>, message: Message) {
+	for (const key of messageIdentityKeys(message)) {
+		const messageIndex = index.get(key);
+		if (messageIndex !== undefined) {
+			return messageIndex;
+		}
+	}
+	return -1;
+}
+
+function messageIdentityKeys(message: Message) {
+	const keys = [`id:${message.id}`];
+	if (message.clientMessageId) {
+		keys.unshift(`client:${message.clientMessageId}`);
+	}
+	if (message.serverMessageId) {
+		keys.unshift(`server:${message.serverMessageId}`);
+	}
+	return keys;
 }
 
 function sortMessagesByTime(messages: Message[]) {

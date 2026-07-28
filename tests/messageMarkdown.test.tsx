@@ -10,7 +10,9 @@ test("renders malformed fenced kaomoji as plain text", () => {
 	expect(parseMarkdownBlocks(value)).toEqual([
 		{ type: "paragraph", text: value },
 	]);
-	expect(markup).toContain(`<p class="message-markdown-paragraph">${value}</p>`);
+	expect(markup).toContain(
+		`<p class="message-markdown-paragraph">${value}</p>`,
+	);
 	expect(markup).not.toContain("message-code-block");
 	expect(markup).not.toContain("message-markdown-code");
 });
@@ -22,11 +24,17 @@ test("keeps valid fenced code blocks working", () => {
 });
 
 test("keeps valid inline code spans working", () => {
-	const markup = renderToStaticMarkup(<MessageContent value="run `bun test`" />);
+	const markup = renderToStaticMarkup(
+		<MessageContent value="run `bun test`" />,
+	);
 
-	expect(markup).toContain(`<code class="message-markdown-code">bun test</code>`);
+	expect(markup).toContain(
+		`<code class="message-markdown-code">bun test</code>`,
+	);
 });
 
 test("consumes malformed block-like lines as paragraphs", () => {
-	expect(parseMarkdownBlocks("- ")).toEqual([{ type: "paragraph", text: "- " }]);
+	expect(parseMarkdownBlocks("- ")).toEqual([
+		{ type: "paragraph", text: "- " },
+	]);
 });

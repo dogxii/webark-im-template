@@ -14,6 +14,7 @@ import { cn } from "./classNames";
 import { resolveMessageSender } from "./conversationDisplay";
 import { MessageBubble } from "./messageBubble";
 import type { MessageRenderer } from "./messageRenderers";
+import { getMessageRenderKey } from "./messageState";
 import { MessageTimeDivider, shouldShowMessageTime } from "./messageTime";
 import { EmptyState } from "./primitives";
 import type { Conversation, Message, MessageAction, User } from "./types";
@@ -74,7 +75,8 @@ export function MessageList({
 		count: messages.length,
 		getScrollElement: () => scrollRef.current,
 		estimateSize: (index) => estimateMessageRowHeight(messages[index]),
-		getItemKey: (index) => messages[index]?.id ?? index,
+		getItemKey: (index) =>
+			messages[index] ? getMessageRenderKey(messages[index]) : index,
 		overscan: 12,
 	});
 

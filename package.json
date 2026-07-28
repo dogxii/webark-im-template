@@ -25,6 +25,7 @@
 		"dev": "vite --host 0.0.0.0",
 		"build": "bun run build:demo && bun run build:lib",
 		"build:demo": "vite build",
+		"build:example": "cd examples/minimal && bun install --frozen-lockfile && bun run typecheck && bun run build",
 		"build:lib": "vite build --mode library",
 		"preview": "vite preview --host 0.0.0.0 --outDir dist/demo",
 		"test:e2e": "playwright test",

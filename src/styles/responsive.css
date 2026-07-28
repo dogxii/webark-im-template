@@ -290,8 +290,7 @@
 		z-index: 22;
 		display: grid;
 		height: calc(
-			var(--mobile-tabbar-height) +
-			env(safe-area-inset-bottom, 0px)
+			var(--mobile-tabbar-height) + env(safe-area-inset-bottom, 0px)
 		);
 		min-height: 0;
 		grid-template-rows: 1fr;
@@ -621,8 +620,7 @@
 
 	.sidebar-body {
 		padding-bottom: calc(
-			var(--mobile-tabbar-height) +
-			env(safe-area-inset-bottom, 0px)
+			var(--mobile-tabbar-height) + env(safe-area-inset-bottom, 0px)
 		);
 		background: #ffffff;
 	}
@@ -803,9 +801,8 @@
 	.chat-pane {
 		--chat-header-height: 42px;
 		--composer-height: calc(
-			var(--mobile-composer-editor-height, 42px) +
-			62px +
-			env(safe-area-inset-bottom, 0px)
+			var(--mobile-composer-editor-height, 42px) + 62px +
+				env(safe-area-inset-bottom, 0px)
 		) !important;
 		grid-template-rows: var(--chat-header-height) minmax(0, 1fr) var(
 				--composer-height

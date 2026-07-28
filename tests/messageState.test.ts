@@ -1,7 +1,9 @@
 import { expect, test } from "bun:test";
 import {
 	createPendingMessage,
+	getMessageRenderKey,
 	markMessageFailed,
+	mergeMessagePage,
 	prependMessagePage,
 	upsertMessage,
 } from "../src/template/messageState";
@@ -42,6 +44,25 @@ test("replaces optimistic message with server receipt by clientMessageId", () =>
 	]);
 });
 
+test("keeps render key stable after server receipt replaces optimistic id", () => {
+	const pending = createPendingMessage({
+		conversationId: "conv-1",
+		body: "hello",
+		clientMessageId: "client-1",
+		createdAt: "2026-07-28T08:00:00.000Z",
+		sender: user,
+	});
+	const receipt: Message = {
+		...pending,
+		id: "server-1",
+		serverMessageId: "server-1",
+		deliveryStatus: "sent",
+	};
+	const [sent] = upsertMessage([pending], receipt);
+
+	expect(getMessageRenderKey(pending)).toBe(getMessageRenderKey(sent));
+});
+
 test("marks a pending message as failed without losing retry identity", () => {
 	const pending = createPendingMessage({
 		conversationId: "conv-1",
@@ -78,6 +99,22 @@ test("prepends history pages without duplicating messages", () => {
 	]);
 });
 
+test("merges large message pages without duplicate scans", () => {
+	const current = Array.from({ length: 10_000 }, (_, index) =>
+		message(`server-${index + 1}`, minute(index + 1)),
+	);
+	const page = [
+		message("server-0", minute(0)),
+		...current.slice(0, 500).map((item) => ({ ...item })),
+	];
+
+	const merged = mergeMessagePage(current, page);
+
+	expect(merged).toHaveLength(10_001);
+	expect(merged[0]?.id).toBe("server-0");
+	expect(merged.at(-1)?.id).toBe("server-10000");
+});
+
 function message(id: string, createdAt: string): Message {
 	return {
 		id,
@@ -89,4 +126,8 @@ function message(id: string, createdAt: string): Message {
 		createdAt,
 		deliveryStatus: "sent",
 	};
+}
+
+function minute(value: number) {
+	return new Date(Date.UTC(2026, 6, 28, 8, value)).toISOString();
 }

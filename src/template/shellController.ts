@@ -179,9 +179,9 @@ export function useChatShellController({
 	);
 	const mainOpen = Boolean(
 		activeConversation ||
-			selectedContact ||
-			selectedGroupConversation ||
-			contactNotice,
+		selectedContact ||
+		selectedGroupConversation ||
+		contactNotice,
 	);
 
 	const switchView = useCallback(

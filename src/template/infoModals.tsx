@@ -114,12 +114,7 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
 }
 
 type HelpTab =
-	| "intro"
-	| "chat"
-	| "notifications"
-	| "contacts"
-	| "interface"
-	| "docs";
+	"intro" | "chat" | "notifications" | "contacts" | "interface" | "docs";
 
 const helpTabs: Array<{
 	id: HelpTab;

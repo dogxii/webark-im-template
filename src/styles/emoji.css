@@ -8,10 +8,8 @@
 	height: min(
 		312px,
 		calc(
-			100dvh -
-			var(--chat-header-height, 74px) -
-			var(--composer-height, 190px) -
-			28px
+			100dvh - var(--chat-header-height, 74px) - var(--composer-height, 190px) -
+				28px
 		)
 	);
 	min-height: 240px;

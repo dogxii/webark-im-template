@@ -4,6 +4,7 @@ import {
 	createPendingMessage,
 	markMessageFailed,
 	markMessageRetrying,
+	mergeMessagePage,
 	prependMessagePage,
 	updateConversationLastMessage,
 	upsertMessage,
@@ -125,7 +126,10 @@ export function useChatDataController({
 				const page = await dataSource.loadMessages(conversationId, null);
 				setMessagesByConversation((current) => ({
 					...current,
-					[conversationId]: page.messages,
+					[conversationId]: mergeMessagePage(
+						current[conversationId] ?? [],
+						page.messages,
+					),
 				}));
 				setMessagePages((current) => ({
 					...current,

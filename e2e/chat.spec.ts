@@ -11,13 +11,26 @@ test.describe("desktop", () => {
 			"狗大王的群聊",
 		);
 
+		const messageScroll = page.locator(".message-scroll");
+		const scrollBeforeHistory = await messageScroll.evaluate((element) => ({
+			height: element.scrollHeight,
+			top: element.scrollTop,
+		}));
 		await page.getByRole("button", { name: /加载更早消息/ }).click();
 		await page.waitForFunction(() =>
 			document
 				.querySelector(".message-scroll")
 				?.textContent?.includes("有没有人"),
 		);
-		await page.locator(".message-scroll").evaluate((element) => {
+		const scrollAfterHistory = await messageScroll.evaluate((element) => ({
+			height: element.scrollHeight,
+			top: element.scrollTop,
+		}));
+		expect(scrollAfterHistory.height).toBeGreaterThan(
+			scrollBeforeHistory.height,
+		);
+		expect(scrollAfterHistory.top).toBeGreaterThan(scrollBeforeHistory.top);
+		await messageScroll.evaluate((element) => {
 			element.scrollTop = 0;
 			element.dispatchEvent(new Event("scroll", { bubbles: true }));
 		});
@@ -35,7 +48,10 @@ test.describe("desktop", () => {
 		await page.keyboard.type("/fail");
 		await page.keyboard.press("Enter");
 		await expect(page.getByText("模拟网络异常，请重试")).toBeVisible();
-		await expect(page.getByRole("button", { name: /重试/ })).toBeVisible();
+		const retryButton = page.getByRole("button", { name: /重试/ });
+		await expect(retryButton).toBeVisible();
+		await retryButton.click();
+		await expect(page.getByText("模拟网络异常，请重试")).toBeVisible();
 	});
 });
 

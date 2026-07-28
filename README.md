@@ -100,6 +100,7 @@ import "webark-im-template/styles.css";
 
 - 游标分页和加载更早消息
 - 动态高度虚拟列表
+- 大列表消息合并去重的索引化路径测试
 - 乐观发送、`pending / sent / failed`
 - `clientMessageId` 去重和服务端回执覆盖本地临时消息
 - 失败重试入口
@@ -118,13 +119,15 @@ import "webark-im-template/styles.css";
 ## ✅ 工程质量
 
 ```bash
+bun run format
 bun run typecheck
 bun run test
 bun run test:e2e
 bun run build
+bun run build:example
 ```
 
-`build` 会同时构建 demo 和 library mode 产物，包入口由 `package.json` 的 `exports` 暴露。
+`build` 会同时构建 demo 和 library mode 产物，包入口由 `package.json` 的 `exports` 暴露。`build:example` 会安装并构建 `examples/minimal`，验证第三方项目可以通过包入口接入。
 
 ## 📁 目录
 

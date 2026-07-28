@@ -46,7 +46,11 @@
 	place-items: center;
 	padding: 24px;
 	background:
-		radial-gradient(circle at 30% 18%, rgba(0, 153, 247, 0.08), transparent 34%),
+		radial-gradient(
+			circle at 30% 18%,
+			rgba(0, 153, 247, 0.08),
+			transparent 34%
+		),
 		#f2f2f2;
 }
 
@@ -704,7 +708,11 @@ html[data-theme="dark"] .auth-screen,
 html[data-theme="dark"] .invite-screen,
 html[data-theme="dark"] .splash {
 	background:
-		radial-gradient(circle at 30% 18%, rgba(0, 153, 247, 0.12), transparent 34%),
+		radial-gradient(
+			circle at 30% 18%,
+			rgba(0, 153, 247, 0.12),
+			transparent 34%
+		),
 		#101112;
 }
 

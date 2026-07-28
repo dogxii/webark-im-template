@@ -1,23 +1,11 @@
 # Minimal Business Integration
 
-This example shows the smallest app-layer shape expected by the template:
+This is a standalone Vite app that consumes `webark-im-template` through the package entry instead of importing repo internals.
 
-- create or inject a `ChatDataSource`
-- drive template state with `useChatDataController`
-- pass conversations, contacts, messages and callbacks into shell components
-
-```tsx
-import "webark-im-template/styles.css";
-import {
-	ChatMainContent,
-	ChatShell,
-	ChatSidebarContent,
-	createMemoryChatDataSource,
-	createTemplateDemoData,
-	mergeConversationPreferences,
-	useChatDataController,
-	useChatShellController,
-} from "webark-im-template";
+```bash
+bun install
+bun run typecheck
+bun run build
 ```
 
-Real applications should replace `createMemoryChatDataSource` with their own API adapter.
+It intentionally uses `createMemoryChatDataSource` so the example stays frontend-only. Real applications should replace that adapter with their own API-backed `ChatDataSource`.

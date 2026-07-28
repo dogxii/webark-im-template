@@ -18,8 +18,7 @@ export type ConversationDetailAction = {
 	kind: ConversationDetailActionKind;
 	label: string | ((context: ConversationDetailActionContext) => string);
 	value?:
-		| string
-		| ((context: ConversationDetailActionContext) => string | undefined);
+		string | ((context: ConversationDetailActionContext) => string | undefined);
 	icon?: LucideIcon;
 	checked?: (context: ConversationDetailActionContext) => boolean;
 	disabled?: (context: ConversationDetailActionContext) => boolean;
