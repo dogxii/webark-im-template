@@ -34,7 +34,7 @@ test.describe("desktop", () => {
 			element.scrollTop = 0;
 			element.dispatchEvent(new Event("scroll", { bubbles: true }));
 		});
-		await expect(page.getByText("有没有人")).toBeVisible();
+		await expect(messageScroll.getByText("有没有人")).toBeVisible();
 
 		const editor = page
 			.locator(".composer-editor[contenteditable='true']")
@@ -42,16 +42,18 @@ test.describe("desktop", () => {
 		await editor.click();
 		await page.keyboard.type("hello from e2e");
 		await page.keyboard.press("Enter");
-		await expect(page.getByText("hello from e2e")).toBeVisible();
+		await expect(
+			messageScroll.getByText("hello from e2e", { exact: true }),
+		).toBeVisible();
 
 		await editor.click();
 		await page.keyboard.type("/fail");
 		await page.keyboard.press("Enter");
-		await expect(page.getByText("模拟网络异常，请重试")).toBeVisible();
+		await expect(messageScroll.getByText("模拟网络异常，请重试")).toBeVisible();
 		const retryButton = page.getByRole("button", { name: /重试/ });
 		await expect(retryButton).toBeVisible();
 		await retryButton.click();
-		await expect(page.getByText("模拟网络异常，请重试")).toBeVisible();
+		await expect(messageScroll.getByText("模拟网络异常，请重试")).toBeVisible();
 	});
 });
 
