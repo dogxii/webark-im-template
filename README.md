@@ -99,8 +99,8 @@ import "webark-im-template/styles.css";
 消息层已支持：
 
 - 游标分页和加载更早消息
-- 动态高度虚拟列表
-- 大列表消息合并去重的索引化路径测试
+- 动态高度消息布局和历史加载后的滚动锚点保持
+- 历史分页去重合并
 - 乐观发送、`pending / sent / failed`
 - `clientMessageId` 去重和服务端回执覆盖本地临时消息
 - 失败重试入口

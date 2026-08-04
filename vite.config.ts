@@ -28,7 +28,6 @@ export default defineConfig(({ mode }) => {
 				outDir: "dist/lib",
 				rollupOptions: {
 					external: [
-						"@tanstack/react-virtual",
 						"lucide-react",
 						"qrcode",
 						"react",

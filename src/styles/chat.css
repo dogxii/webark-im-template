@@ -507,17 +507,13 @@
 	gap: 20px;
 	padding: 26px 10px 20px 24px;
 	overflow: auto;
+	overflow-anchor: none;
 	overscroll-behavior: contain;
 	scrollbar-color: transparent transparent;
 	scrollbar-width: thin;
 	scrollbar-gutter: stable;
 	background: var(--chat-surface);
 	transition: scrollbar-color 120ms ease-out;
-}
-
-.message-scroll-virtual {
-	display: block;
-	position: relative;
 }
 
 .message-history-loader {
@@ -542,21 +538,11 @@
 	opacity: 0.62;
 }
 
-.message-virtualizer {
-	position: relative;
-	width: 100%;
+.message-list-row {
+	min-width: 0;
 }
 
-.message-virtual-row {
-	position: absolute;
-	top: 0;
-	right: 0;
-	left: 0;
-	box-sizing: border-box;
-	padding-bottom: 20px;
-}
-
-.message-virtual-row .message-time-divider {
+.message-list-row .message-time-divider {
 	display: flex;
 	width: fit-content;
 	margin: 4px auto 14px;

@@ -54,6 +54,36 @@ test.describe("desktop", () => {
 		await expect(retryButton).toBeVisible();
 		await retryButton.click();
 		await expect(messageScroll.getByText("模拟网络异常，请重试")).toBeVisible();
+
+		const resizeHandle = page.getByRole("separator", {
+			name: "调整会话列表宽度",
+		});
+		const handleBox = await resizeHandle.boundingBox();
+		expect(handleBox).not.toBeNull();
+		if (!handleBox) {
+			return;
+		}
+
+		const dragY = handleBox.y + handleBox.height / 2;
+		const dragX = handleBox.x + handleBox.width / 2;
+		await page.mouse.move(dragX, dragY);
+		await page.mouse.down();
+		await page.mouse.move(dragX + 140, dragY, { steps: 8 });
+		await page.mouse.move(dragX - 80, dragY, { steps: 8 });
+		await page.mouse.up();
+
+		const messageBounds = await messageScroll.boundingBox();
+		const composerBounds = await page.locator(".composer").boundingBox();
+		expect(messageBounds).not.toBeNull();
+		expect(composerBounds).not.toBeNull();
+		if (!messageBounds || !composerBounds) {
+			return;
+		}
+
+		expect(
+			Math.round(messageBounds.y + messageBounds.height),
+		).toBeLessThanOrEqual(Math.round(composerBounds.y) + 1);
+		await expect(messageScroll.getByText("模拟网络异常，请重试")).toBeVisible();
 	});
 });
 

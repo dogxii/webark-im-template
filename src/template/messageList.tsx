@@ -1,11 +1,8 @@
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronsUp } from "lucide-react";
 import {
-	Fragment,
 	useCallback,
 	useEffect,
 	useLayoutEffect,
-	useMemo,
 	useRef,
 	useState,
 } from "react";
@@ -14,7 +11,6 @@ import { cn } from "./classNames";
 import { resolveMessageSender } from "./conversationDisplay";
 import { MessageBubble } from "./messageBubble";
 import type { MessageRenderer } from "./messageRenderers";
-import { getMessageRenderKey } from "./messageState";
 import { MessageTimeDivider, shouldShowMessageTime } from "./messageTime";
 import { EmptyState } from "./primitives";
 import type { Conversation, Message, MessageAction, User } from "./types";
@@ -64,23 +60,14 @@ export function MessageList({
 	const historyRequestRef = useRef(false);
 	const nearBottomRef = useRef(true);
 	const previousConversationIdRef = useRef(conversation.id);
-	const previousLastMessageIdRef = useRef<string | null>(null);
+	const previousLastMessageKeyRef = useRef<string | null>(null);
 	const [unreadJump, setUnreadJump] = useState<UnreadJumpState | null>(null);
 	const showSenderNames = conversation.type !== "direct";
 	const firstUnreadIndex = unreadJump
 		? Math.max(0, messages.length - unreadJump.total)
 		: -1;
-
-	const rowVirtualizer = useVirtualizer({
-		count: messages.length,
-		getScrollElement: () => scrollRef.current,
-		estimateSize: (index) => estimateMessageRowHeight(messages[index]),
-		getItemKey: (index) =>
-			messages[index] ? getMessageRenderKey(messages[index]) : index,
-		overscan: 12,
-	});
-
-	const virtualItems = rowVirtualizer.getVirtualItems();
+	const lastMessage = messages[messages.length - 1];
+	const lastMessageKey = lastMessage ? messageListKey(lastMessage) : null;
 
 	const requestLoadMoreHistory = useCallback(async () => {
 		const scroll = scrollRef.current;
@@ -125,7 +112,7 @@ export function MessageList({
 					}
 				: null,
 		);
-	}, [conversation.id]);
+	}, [conversation.id, conversation.unreadCount, messages.length]);
 
 	useLayoutEffect(() => {
 		const scroll = scrollRef.current;
@@ -137,48 +124,40 @@ export function MessageList({
 		if (anchor) {
 			historyAnchorRef.current = null;
 			const frame = window.requestAnimationFrame(() => {
-				rowVirtualizer.measure();
 				scroll.scrollTop =
 					scroll.scrollHeight - anchor.scrollHeight + anchor.scrollTop;
+				nearBottomRef.current = isNearBottom(scroll);
 			});
 			return () => window.cancelAnimationFrame(frame);
 		}
 
-		const lastMessage = messages[messages.length - 1];
-		const lastMessageId = lastMessage?.id ?? null;
 		const conversationChanged =
 			previousConversationIdRef.current !== conversation.id;
+		const lastMessageChanged =
+			previousLastMessageKeyRef.current !== lastMessageKey;
 		const shouldAutoScroll =
 			conversationChanged ||
-			nearBottomRef.current ||
-			lastMessage?.senderId === user.id;
+			(lastMessageChanged &&
+				(nearBottomRef.current || lastMessage?.senderId === user.id));
 
 		previousConversationIdRef.current = conversation.id;
-		previousLastMessageIdRef.current = lastMessageId;
+		previousLastMessageKeyRef.current = lastMessageKey;
 
-		if (!loading && lastMessageId && shouldAutoScroll) {
+		if (!loading && lastMessageKey && shouldAutoScroll) {
 			const frame = window.requestAnimationFrame(() => {
 				scroll.scrollTop = scroll.scrollHeight;
+				nearBottomRef.current = true;
 			});
 			return () => window.cancelAnimationFrame(frame);
 		}
-	}, [conversation.id, loading, messages.length, rowVirtualizer, user.id]);
-
-	useEffect(() => {
-		rowVirtualizer.measure();
-	}, [messages, rowVirtualizer]);
-
-	const visibleRange = useMemo(() => {
-		const first = virtualItems[0]?.index ?? 0;
-		const last = virtualItems[virtualItems.length - 1]?.index ?? 0;
-		return { first, last };
-	}, [virtualItems]);
-
-	useEffect(() => {
-		if (!unreadJump || visibleRange.first >= firstUnreadIndex) {
-			setUnreadJump(null);
-		}
-	}, [firstUnreadIndex, unreadJump, visibleRange.first]);
+	}, [
+		conversation.id,
+		lastMessage?.senderId,
+		lastMessageKey,
+		loading,
+		messages.length,
+		user.id,
+	]);
 
 	function handleScroll() {
 		const scroll = scrollRef.current;
@@ -186,8 +165,10 @@ export function MessageList({
 			return;
 		}
 
-		nearBottomRef.current =
-			scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 96;
+		nearBottomRef.current = isNearBottom(scroll);
+		if (unreadJump && nearBottomRef.current) {
+			setUnreadJump(null);
+		}
 
 		if (scroll.scrollTop < 180) {
 			void requestLoadMoreHistory();
@@ -195,22 +176,19 @@ export function MessageList({
 	}
 
 	function jumpToFirstUnreadMessage() {
-		if (firstUnreadIndex < 0) {
-			setUnreadJump(null);
-			return;
-		}
+		const scroll = scrollRef.current;
+		const firstUnread = scroll?.querySelector<HTMLElement>(
+			`[data-message-index="${firstUnreadIndex}"]`,
+		);
 
-		rowVirtualizer.scrollToIndex(firstUnreadIndex, {
-			align: "start",
-			behavior: "smooth",
-		});
+		firstUnread?.scrollIntoView({ block: "start", behavior: "smooth" });
 		setUnreadJump(null);
 	}
 
 	return (
 		<>
 			<div
-				className={cn("message-scroll", "message-scroll-virtual")}
+				className={cn("message-scroll")}
 				ref={scrollRef}
 				onScroll={handleScroll}
 			>
@@ -229,56 +207,39 @@ export function MessageList({
 				) : messages.length === 0 ? (
 					<EmptyState title="还没有消息" body="发出第一条消息。" />
 				) : (
-					<div
-						className={cn("message-virtualizer")}
-						style={{
-							height: `${rowVirtualizer.getTotalSize()}px`,
-						}}
-					>
-						{virtualItems.map((virtualItem) => {
-							const message = messages[virtualItem.index];
-							if (!message) {
-								return null;
-							}
-							const previous = messages[virtualItem.index - 1];
-							const mine = message.senderId === user.id;
-							const sender = resolveMessageSender(message, conversation, user);
-							return (
-								<div
-									className={cn("message-virtual-row")}
-									data-index={virtualItem.index}
-									key={virtualItem.key}
-									ref={rowVirtualizer.measureElement}
-									style={{
-										transform: `translateY(${virtualItem.start}px)`,
-									}}
-								>
-									<Fragment>
-										{shouldShowMessageTime(previous, message) ? (
-											<MessageTimeDivider value={message.createdAt} />
-										) : null}
-										<MessageBubble
-											message={message}
-											conversation={conversation}
-											sender={sender}
-											mine={mine}
-											senderName={displayUserName(sender)}
-											senderAvatarUrl={sender.avatarUrl}
-											senderSeed={sender.identityValue}
-											senderKind={sender.kind}
-											showSenderName={showSenderNames}
-											active={activeMessageId === message.id}
-											renderers={renderers}
-											onContextMenu={onContextMenu}
-											onLongPress={onLongPress}
-											onAction={onAction}
-											onRetryMessage={onRetryMessage}
-										/>
-									</Fragment>
-								</div>
-							);
-						})}
-					</div>
+					messages.map((message, index) => {
+						const previous = messages[index - 1];
+						const mine = message.senderId === user.id;
+						const sender = resolveMessageSender(message, conversation, user);
+						return (
+							<div
+								className={cn("message-list-row")}
+								data-message-index={index}
+								key={messageListKey(message)}
+							>
+								{shouldShowMessageTime(previous, message) ? (
+									<MessageTimeDivider value={message.createdAt} />
+								) : null}
+								<MessageBubble
+									message={message}
+									conversation={conversation}
+									sender={sender}
+									mine={mine}
+									senderName={displayUserName(sender)}
+									senderAvatarUrl={sender.avatarUrl}
+									senderSeed={sender.identityValue}
+									senderKind={sender.kind}
+									showSenderName={showSenderNames}
+									active={activeMessageId === message.id}
+									renderers={renderers}
+									onContextMenu={onContextMenu}
+									onLongPress={onLongPress}
+									onAction={onAction}
+									onRetryMessage={onRetryMessage}
+								/>
+							</div>
+						);
+					})
 				)}
 			</div>
 
@@ -296,23 +257,14 @@ export function MessageList({
 	);
 }
 
-function estimateMessageRowHeight(message: Message | undefined) {
-	if (!message) {
-		return 76;
-	}
-	if (/```/.test(message.body)) {
-		return 220;
-	}
-	if (/!\[[^\]\n]*\]\(https?:\/\/[^\s)]+\)/i.test(message.body)) {
-		return 280;
-	}
-	if (message.body.length > 360) {
-		return 170;
-	}
-	if (message.body.length > 120) {
-		return 112;
-	}
-	return 76;
+function messageListKey(message: Message) {
+	return `${message.conversationId}:${
+		message.clientMessageId ?? message.serverMessageId ?? message.id
+	}`;
+}
+
+function isNearBottom(scroll: HTMLElement) {
+	return scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 96;
 }
 
 function formatUnreadJumpCount(value: number) {

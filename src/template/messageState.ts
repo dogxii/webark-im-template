@@ -91,12 +91,6 @@ export function mergeMessagePage(current: Message[], pageMessages: Message[]) {
 	return mergeMessageLists([...pageMessages, ...current]);
 }
 
-export function getMessageRenderKey(message: Message) {
-	return `${message.conversationId}:${
-		message.clientMessageId ?? message.serverMessageId ?? message.id
-	}`;
-}
-
 export function updateConversationLastMessage(
 	conversations: Conversation[],
 	message: Message,
