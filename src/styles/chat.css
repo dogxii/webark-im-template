@@ -47,6 +47,8 @@
 	min-width: 0;
 	min-height: 0;
 	overflow: auto;
+	overscroll-behavior: contain;
+	scrollbar-gutter: stable;
 	padding: 18px 14px 24px;
 	border-left: 1px solid #dedede;
 	background: var(--chat-surface);
@@ -140,7 +142,46 @@
 	justify-items: center;
 	align-content: start;
 	position: relative;
+	overscroll-behavior: contain;
+	scrollbar-gutter: stable;
 	padding: 92px 48px 48px;
+}
+
+.group-info-panel,
+.conversation-details,
+.contact-profile-pane {
+	scrollbar-color: rgba(0, 0, 0, 0.16) transparent;
+	scrollbar-width: thin;
+}
+
+.group-info-panel::-webkit-scrollbar,
+.conversation-details::-webkit-scrollbar,
+.contact-profile-pane::-webkit-scrollbar {
+	width: 10px;
+}
+
+.group-info-panel::-webkit-scrollbar-track,
+.conversation-details::-webkit-scrollbar-track,
+.contact-profile-pane::-webkit-scrollbar-track {
+	margin-block: 8px;
+	background: transparent;
+}
+
+.group-info-panel::-webkit-scrollbar-thumb,
+.conversation-details::-webkit-scrollbar-thumb,
+.contact-profile-pane::-webkit-scrollbar-thumb {
+	min-height: 42px;
+	border: 3px solid transparent;
+	border-radius: 999px;
+	background-color: rgba(0, 0, 0, 0.16);
+	background-clip: padding-box;
+}
+
+.group-info-panel::-webkit-scrollbar-thumb:hover,
+.conversation-details::-webkit-scrollbar-thumb:hover,
+.contact-profile-pane::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(0, 0, 0, 0.24);
+	background-clip: padding-box;
 }
 
 .icon-button.contact-profile-back {
@@ -1679,6 +1720,12 @@ button.group-info-heading {
 	border-color: #0099f7;
 	background: #0099f7;
 	color: #ffffff;
+}
+
+.group-avatar-actions .primary-button:hover:not(:disabled),
+.group-edit-actions .primary-button:hover:not(:disabled) {
+	border-color: #0088dc;
+	background: #0088dc;
 }
 
 .form-status.compact {

@@ -688,7 +688,10 @@ html[data-theme="dark"] .theme-option.active .theme-option-label {
 html[data-theme="dark"] .composer-editor,
 html[data-theme="dark"] .message-scroll,
 html[data-theme="dark"] .emoji-panel-body,
-html[data-theme="dark"] .message-code-pre {
+html[data-theme="dark"] .message-code-pre,
+html[data-theme="dark"] .group-info-panel,
+html[data-theme="dark"] .conversation-details,
+html[data-theme="dark"] .contact-profile-pane {
 	scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
 }
 
@@ -700,8 +703,17 @@ html[data-theme="dark"] .message-scroll:hover {
 html[data-theme="dark"] .composer-editor:hover::-webkit-scrollbar-thumb,
 html[data-theme="dark"] .message-scroll:hover::-webkit-scrollbar-thumb,
 html[data-theme="dark"] .emoji-panel-body::-webkit-scrollbar-thumb,
-html[data-theme="dark"] .message-code-pre::-webkit-scrollbar-thumb {
+html[data-theme="dark"] .message-code-pre::-webkit-scrollbar-thumb,
+html[data-theme="dark"] .group-info-panel::-webkit-scrollbar-thumb,
+html[data-theme="dark"] .conversation-details::-webkit-scrollbar-thumb,
+html[data-theme="dark"] .contact-profile-pane::-webkit-scrollbar-thumb {
 	background-color: rgba(255, 255, 255, 0.16);
+}
+
+html[data-theme="dark"] .group-info-panel::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] .conversation-details::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] .contact-profile-pane::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(255, 255, 255, 0.24);
 }
 
 html[data-theme="dark"] .auth-screen,
@@ -881,6 +893,16 @@ html[data-theme="dark"] .group-edit-actions .primary-button {
 	border-color: #0877d8;
 	background: #0877d8;
 	color: #ffffff;
+}
+
+html[data-theme="dark"]
+	.group-avatar-actions
+	.primary-button:hover:not(:disabled),
+html[data-theme="dark"]
+	.group-edit-actions
+	.primary-button:hover:not(:disabled) {
+	border-color: #149dff;
+	background: #149dff;
 }
 
 html[data-theme="dark"] .group-invite-button:hover {

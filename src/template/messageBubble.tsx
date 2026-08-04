@@ -133,6 +133,7 @@ export function MessageBubble({
 		<div
 			className={cn("message-line", mine ? "mine" : "theirs")}
 			data-message-id={message.id}
+			aria-busy={message.deliveryStatus === "pending" || undefined}
 		>
 			{!mine ? (
 				<Avatar
@@ -179,9 +180,6 @@ export function MessageBubble({
 					},
 					renderers,
 				)}
-				{mine && message.deliveryStatus === "pending" ? (
-					<span className={cn("message-delivery-status")}>发送中</span>
-				) : null}
 				{mine && message.deliveryStatus === "failed" ? (
 					<div className={cn("message-delivery-status", "failed")}>
 						<span>{message.sendError ?? "发送失败"}</span>
