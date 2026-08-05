@@ -116,19 +116,6 @@ import "webark-im-template/styles.css";
 
 最小业务接入示例见 `examples/minimal`。
 
-## ✅ 工程质量
-
-```bash
-bun run format
-bun run typecheck
-bun run test
-bun run test:e2e
-bun run build
-bun run build:example
-```
-
-`build` 会同时构建 demo 和 library mode 产物，包入口由 `package.json` 的 `exports` 暴露。`build:example` 会安装并构建 `examples/minimal`，验证第三方项目可以通过包入口接入。
-
 ## 📁 目录
 
 ```txt
@@ -142,16 +129,6 @@ examples/minimal/   smallest business integration sample
 e2e/                Playwright smoke tests
 tests/              unit and component tests
 ```
-
-## 📈 项目 Star 历史
-
-<a href="https://www.star-history.com/?repos=dogxii%2Fwebark-im-template&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=dogxii/webark-im-template&type=date&theme=dark&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=dogxii/webark-im-template&type=date&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=dogxii/webark-im-template&type=date&legend=bottom-right" />
- </picture>
-</a>
 
 ## 🪪 License
 
