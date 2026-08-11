@@ -12,28 +12,54 @@ test.describe("desktop", () => {
 		);
 
 		const messageScroll = page.locator(".message-scroll");
-		const scrollBeforeHistory = await messageScroll.evaluate((element) => ({
-			height: element.scrollHeight,
-			top: element.scrollTop,
-		}));
-		await page.getByRole("button", { name: /加载更早消息/ }).click();
+		await expect(messageScroll.locator(".message-list-row")).toHaveCount(18);
+		const anchorText = "@Dogxi 艾特";
+		const anchorOffsetBeforeHistory = await messageScroll.evaluate(
+			(element, text) => {
+				element.scrollTop = 0;
+				const anchor = Array.from(
+					element.querySelectorAll<HTMLElement>(".message-list-row"),
+				).find((row) => row.textContent?.includes(text));
+				const offset = anchor
+					? anchor.getBoundingClientRect().top -
+						element.getBoundingClientRect().top
+					: null;
+				element.dispatchEvent(new Event("scroll", { bubbles: true }));
+				return offset;
+			},
+			anchorText,
+		);
+		expect(anchorOffsetBeforeHistory).not.toBeNull();
 		await page.waitForFunction(() =>
 			document
 				.querySelector(".message-scroll")
 				?.textContent?.includes("有没有人"),
 		);
-		const scrollAfterHistory = await messageScroll.evaluate((element) => ({
-			height: element.scrollHeight,
-			top: element.scrollTop,
-		}));
-		expect(scrollAfterHistory.height).toBeGreaterThan(
-			scrollBeforeHistory.height,
+		await page.evaluate(
+			() =>
+				new Promise((resolve) =>
+					requestAnimationFrame(() => requestAnimationFrame(resolve)),
+				),
 		);
-		expect(scrollAfterHistory.top).toBeGreaterThan(scrollBeforeHistory.top);
-		await messageScroll.evaluate((element) => {
-			element.scrollTop = 0;
-			element.dispatchEvent(new Event("scroll", { bubbles: true }));
-		});
+		await expect(messageScroll.locator(".message-list-row")).toHaveCount(29);
+		const anchorOffsetAfterHistory = await messageScroll.evaluate(
+			(element, text) => {
+				const anchor = Array.from(
+					element.querySelectorAll<HTMLElement>(".message-list-row"),
+				).find((row) => row.textContent?.includes(text));
+				return anchor
+					? anchor.getBoundingClientRect().top -
+							element.getBoundingClientRect().top
+					: null;
+			},
+			anchorText,
+		);
+		expect(anchorOffsetAfterHistory).not.toBeNull();
+		expect(
+			Math.abs(
+				(anchorOffsetAfterHistory ?? 0) - (anchorOffsetBeforeHistory ?? 0),
+			),
+		).toBeLessThanOrEqual(1);
 		await expect(messageScroll.getByText("有没有人")).toBeVisible();
 
 		const editor = page

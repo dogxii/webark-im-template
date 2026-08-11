@@ -19,6 +19,8 @@ import { displayUserName } from "./user";
 type HistoryAnchor = {
 	scrollHeight: number;
 	scrollTop: number;
+	messageKey?: string;
+	messageOffsetTop?: number;
 };
 
 type UnreadJumpState = {
@@ -84,9 +86,14 @@ export function MessageList({
 		}
 
 		historyRequestRef.current = true;
+		const anchorRow = findFirstVisibleMessageRow(scroll);
 		historyAnchorRef.current = {
 			scrollHeight: scroll.scrollHeight,
 			scrollTop: scroll.scrollTop,
+			messageKey: anchorRow?.dataset.messageKey,
+			messageOffsetTop: anchorRow
+				? getMessageOffsetTop(scroll, anchorRow)
+				: undefined,
 		};
 
 		try {
@@ -124,8 +131,16 @@ export function MessageList({
 		if (anchor) {
 			historyAnchorRef.current = null;
 			const frame = window.requestAnimationFrame(() => {
-				scroll.scrollTop =
-					scroll.scrollHeight - anchor.scrollHeight + anchor.scrollTop;
+				const anchorRow = anchor.messageKey
+					? findMessageRow(scroll, anchor.messageKey)
+					: null;
+				if (anchorRow && anchor.messageOffsetTop !== undefined) {
+					scroll.scrollTop +=
+						getMessageOffsetTop(scroll, anchorRow) - anchor.messageOffsetTop;
+				} else {
+					scroll.scrollTop =
+						scroll.scrollHeight - anchor.scrollHeight + anchor.scrollTop;
+				}
 				nearBottomRef.current = isNearBottom(scroll);
 			});
 			return () => window.cancelAnimationFrame(frame);
@@ -215,6 +230,7 @@ export function MessageList({
 							<div
 								className={cn("message-list-row")}
 								data-message-index={index}
+								data-message-key={messageListKey(message)}
 								key={messageListKey(message)}
 							>
 								{shouldShowMessageTime(previous, message) ? (
@@ -261,6 +277,27 @@ function messageListKey(message: Message) {
 	return `${message.conversationId}:${
 		message.clientMessageId ?? message.serverMessageId ?? message.id
 	}`;
+}
+
+function findFirstVisibleMessageRow(scroll: HTMLElement) {
+	const scrollTop = scroll.getBoundingClientRect().top;
+	return (
+		Array.from(scroll.querySelectorAll<HTMLElement>("[data-message-key]")).find(
+			(row) => row.getBoundingClientRect().bottom > scrollTop,
+		) ?? null
+	);
+}
+
+function findMessageRow(scroll: HTMLElement, messageKey: string) {
+	return (
+		Array.from(scroll.querySelectorAll<HTMLElement>("[data-message-key]")).find(
+			(row) => row.dataset.messageKey === messageKey,
+		) ?? null
+	);
+}
+
+function getMessageOffsetTop(scroll: HTMLElement, row: HTMLElement) {
+	return row.getBoundingClientRect().top - scroll.getBoundingClientRect().top;
 }
 
 function isNearBottom(scroll: HTMLElement) {
